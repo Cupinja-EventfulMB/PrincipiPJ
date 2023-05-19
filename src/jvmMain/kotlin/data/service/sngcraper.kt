@@ -6,15 +6,15 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
-import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-fun sngScraper() {
+fun sngScraper(): List<Event>{
     System.setProperty(
         "webdriver.chrome.driver",
-        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\Podatki_PPJ_1\\src\\jvmMain\\kotlin\\data\\service\\chromedriver.exe"
+        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
     )
+    val events: MutableList<Event> = mutableListOf()
     val options = ChromeOptions()
     //options.setHeadless(true)
     val driver = ChromeDriver(options)
@@ -30,16 +30,23 @@ fun sngScraper() {
         val title = element.selectFirst(".title")?.text()
 
         if (title != null) {
-            val dateStr = element.attr("data-date")
-            val format = SimpleDateFormat("yyyy-MM-dd")
-            val date = format.parse(dateStr)
-            val startDate = LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault())
+            val time = element.selectFirst(".time")?.text()
+            val dateStr =
+                if (time.isNullOrBlank()) element.attr("data-date") + "T00:00" else element.attr("data-date") + "T${
+                    time.replace(
+                        '.',
+                        ':'
+                    )
+                }"
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
+            val localDateTime = LocalDateTime.parse(dateStr, formatter)
 
             val location = Location("SNG", "Maribor", " Slovenska ulica 27")
 
-            val event = Event(title, startDate, location)
+            val event = Event(title, localDateTime, location)
+            events.add(event)
             println(event)
         }
     }
-    println("==============================================================")
+    return events
 }

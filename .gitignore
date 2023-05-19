@@ -40,3 +40,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### ENV File ###
+src/jvmMain/kotlin/data/.env

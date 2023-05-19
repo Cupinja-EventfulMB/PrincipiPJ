@@ -1,23 +1,59 @@
 package scraping
 
-import com.mongodb.ConnectionString
-import com.mongodb.MongoClientSettings
-import com.mongodb.client.MongoClients
+import Database
+import data.model.Event
+import data.service.eventimScraper
+import data.service.sngScraper
+import io.github.cdimascio.dotenv.Dotenv
+import io.github.cdimascio.dotenv.dotenv
+import org.bson.Document
+import org.bson.types.ObjectId
 
 fun main() {
-    val connectionString = ConnectionString("mongodb://localhost:27017") // Replace with your MongoDB connection string
-    val mongoClientSettings = MongoClientSettings.builder()
-        .applyConnectionString(connectionString)
-        .build()
+    val dotenv: Dotenv = dotenv {
+        directory =
+            "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\.env"
+        ignoreIfMissing = true
+    }
 
-    val mongoClient = MongoClients.create(mongoClientSettings)
-    val database = mongoClient.getDatabase("principipj")
+    val DATABASE_USERNAME: String? = dotenv["DATABASE_USERNAME"]
+    val DATABASE_PASSWORD: String? = dotenv["DATABASE_PASSWORD"]
+    val DATABASE_NAME: String? = dotenv["DATABASE_NAME"]
 
-    database.createCollection("Event")
+    val connection = Database.connect(DATABASE_USERNAME!!, DATABASE_PASSWORD!!, DATABASE_NAME!!)
+    // Insert events
+    val eventCollection = connection.database.getCollection("event")
+    val locationCollection = connection.database.getCollection("location")
+    var locationId: ObjectId?
+    var eventDocument: Document?
+    lateinit var queryFilterLocationInstitution: Document
+    lateinit var queryFilterEventTitle: Document
+
+    val events = mutableListOf<Event>()
+    events.addAll(eventimScraper())
+    events.addAll(sngScraper())
 
 
-//    eventimScraper()
-//    sngScraper()
-//    cineplexScraper()
+    for (event in events) {
+        queryFilterLocationInstitution = Document("institution", event.location.institution)
+        queryFilterEventTitle =
+            Document("title", event.title).append("date", event.date)
+
+        eventDocument = eventCollection.find(queryFilterEventTitle).first()
+        if (eventDocument == null) {
+            locationId = locationCollection.find(queryFilterLocationInstitution).firstOrNull()?.get("_id") as ObjectId?// check if location already exists
+            if (locationId == null) {
+                locationId = locationCollection.insertOne(
+                    Document().append("institution", event.location.institution).append("city", event.location.city)
+                        .append("street", event.location.street)
+                ).insertedId!!.asObjectId().value
+            }
+            eventCollection.insertOne(
+                Document().append("title", event.title).append("date", event.date)
+                    .append("location", locationId)
+            )
+        }
+    }
+
 }
 

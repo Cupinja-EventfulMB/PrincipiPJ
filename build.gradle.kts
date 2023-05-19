@@ -3,7 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
-    // id("io.realm.kotlin")
+    id("io.realm.kotlin") version "1.8.0"
 
 }
 
@@ -26,11 +26,11 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation ("org.mongodb:mongodb-driver-sync:4.3.1") // mongo baza
-                implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                implementation ("io.realm.kotlin:library-base:1.6.1")
                 implementation ("org.jsoup:jsoup:1.14.2") // jsoup
                 implementation("org.seleniumhq.selenium:selenium-java:3.8.1") // selenium
+                implementation ("org.mongodb:mongodb-driver-sync:4.5.1") // mongodb
+                implementation ("io.github.cdimascio:dotenv-kotlin:6.4.1") // .env
+                implementation("io.github.cdimascio:java-dotenv:5.2.2")
 
             }
         }
