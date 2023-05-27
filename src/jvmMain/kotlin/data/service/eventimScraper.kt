@@ -10,14 +10,14 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-fun eventimScraper(): List<Event> {
+fun eventimScraperEvents(): List<Event> {
     System.setProperty(
         "webdriver.chrome.driver",
         "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
     )
     val events: MutableList<Event> = mutableListOf()
     val options = ChromeOptions()
-    //  options.setHeadless(true)
+    options.setHeadless(true)
     val driver = ChromeDriver(options)
     val url = "https://www.eventim.si/si/venues/maribor/city.html"
     driver.get(url)
@@ -35,6 +35,7 @@ fun eventimScraper(): List<Event> {
         hashMapInstitutionLocation[nameInstitution] = street
     }
 
+    var descriptionAndImage: MutableMap<String, String> = mutableMapOf()
     for (element in document.select(".m-eventListItem")) {
         val title = element.selectFirst(".m-eventListItem__title")?.text()
 
@@ -46,16 +47,55 @@ fun eventimScraper(): List<Event> {
             val localTime = offsetDateTime.toLocalTime()
             val localDateTime = LocalDateTime.of(localDate, localTime)
 
+
             val institution = element.selectFirst(".m-eventListItem__venue")!!.text().split(',')[0]
             val city = element.selectFirst(".m-eventListItem__address")!!.text()
             val street = hashMapInstitutionLocation[institution]!!
             val location = Location(institution, city, street)
 
-            val event = Event(title, localDateTime, location)
+            val descImgPlace = element.selectFirst(".m-eventListItem")
+            val descImgUrl = "https://www.eventim.si" + descImgPlace!!.attr("href")
+            descriptionAndImage = eventimScraperDescriptionAndImage(descImgUrl)
+
+            val descUrl = descriptionAndImage["desc"]
+            val imageUrl = descriptionAndImage["image"]
+
+            val event = Event(imageUrl!!,title, localDateTime, location, descUrl!!)
             events.add(event)
             println(event)
-
         }
     }
     return events
+}
+fun eventimScraperDescriptionAndImage(url: String): MutableMap<String, String> {
+    val descriptionAndImage: MutableMap<String, String> = mutableMapOf()
+    System.setProperty(
+        "webdriver.chrome.driver",
+        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
+    )
+    val options = ChromeOptions()
+    options.setHeadless(true)
+    val driver = ChromeDriver(options)
+    driver.get(url)
+    val pageSource = driver.pageSource
+    driver.close()
+    val document: Document = Jsoup.parse(pageSource)
+
+    val descriptionEventDiv = document.selectFirst(".m-panel")
+    val imageEventUrl = document.selectFirst(".img-responsive")
+
+    descriptionAndImage["desc"]  = if(descriptionEventDiv == null) {
+        "There is not description for this event :("
+    } else {
+        descriptionEventDiv.text()
+    }
+
+    descriptionAndImage["image"] = if(imageEventUrl == null) {
+        "https:" + document.selectFirst(".o-mainHeader__logoImg")!!.attr("src")
+    } else {
+        "https:" + imageEventUrl.attr("src")
+    }
+
+    return descriptionAndImage
+
 }

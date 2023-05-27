@@ -30,7 +30,6 @@ kotlin {
                 implementation("org.seleniumhq.selenium:selenium-java:3.8.1") // selenium
                 implementation ("org.mongodb:mongodb-driver-sync:4.5.1") // mongodb
                 implementation ("io.github.cdimascio:dotenv-kotlin:6.4.1") // .env
-                implementation("io.github.cdimascio:java-dotenv:5.2.2")
 
             }
         }

@@ -2,15 +2,14 @@ package scraping
 
 import Database
 import data.model.Event
-import data.service.eventimScraper
-import data.service.sngScraper
-import io.github.cdimascio.dotenv.Dotenv
+import data.service.eventimScraperEvents
+import data.service.sngScraperEvents
 import io.github.cdimascio.dotenv.dotenv
 import org.bson.Document
 import org.bson.types.ObjectId
 
 fun main() {
-    val dotenv: Dotenv = dotenv {
+    val dotenv = dotenv {
         directory =
             "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\.env"
         ignoreIfMissing = true
@@ -22,16 +21,16 @@ fun main() {
 
     val connection = Database.connect(DATABASE_USERNAME!!, DATABASE_PASSWORD!!, DATABASE_NAME!!)
     // Insert events
-    val eventCollection = connection.database.getCollection("event")
-    val locationCollection = connection.database.getCollection("location")
+    val eventCollection = connection.database.getCollection("events")
+    val locationCollection = connection.database.getCollection("locations")
     var locationId: ObjectId?
     var eventDocument: Document?
     lateinit var queryFilterLocationInstitution: Document
     lateinit var queryFilterEventTitle: Document
 
     val events = mutableListOf<Event>()
-    events.addAll(eventimScraper())
-    events.addAll(sngScraper())
+    events.addAll(eventimScraperEvents())
+    events.addAll(sngScraperEvents())
 
 
     for (event in events) {
@@ -50,10 +49,12 @@ fun main() {
             }
             eventCollection.insertOne(
                 Document().append("title", event.title).append("date", event.date)
-                    .append("location", locationId)
+                    .append("location", locationId).append("description", event.description).append("img_url", event.image)
             )
         }
     }
 
+    eventimScraperEvents()
+    sngScraperEvents()
 }
 
