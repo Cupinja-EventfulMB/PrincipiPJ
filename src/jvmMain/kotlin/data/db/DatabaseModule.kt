@@ -1,4 +1,3 @@
-
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.ServerApi
@@ -16,17 +15,16 @@ class Database(val client: MongoClient, val database: MongoDatabase) {
             try {
                 val connString = ConnectionString("mongodb+srv://$username:$password@cluster0.ux3rjiq.mongodb.net/")
                 val settings = MongoClientSettings.builder()
-                    .applyConnectionString(connString)
-                    .serverApi(
-                        ServerApi.builder().version(ServerApiVersion.V1).build()
-                    )
-                    .build()
+                        .applyConnectionString(connString)
+                        .serverApi(
+                                ServerApi.builder().version(ServerApiVersion.V1).build()
+                        )
+                        .build()
 
                 mongoClient = MongoClients.create(settings)
 
                 database = mongoClient.getDatabase(dbName)
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 println("AppDebug: " + e.toString() + " - \n\n Message: " + e.message + " -\n\n StackTrace: " + e.stackTrace)
             }
 

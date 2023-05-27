@@ -12,10 +12,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-fun sngScraperEvents(): List<Event>{
+fun sngScraperEvents(): List<Event> {
     System.setProperty(
-        "webdriver.chrome.driver",
-        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
+            "webdriver.chrome.driver",
+            "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
     )
     val events: MutableList<Event> = mutableListOf()
     val options = ChromeOptions()
@@ -36,12 +36,12 @@ fun sngScraperEvents(): List<Event>{
         if (title != null) {
             val time = element.selectFirst(".time")?.text()
             val dateStr =
-                if (time.isNullOrBlank()) element.attr("data-date") + "T00:00" else element.attr("data-date") + "T${
-                    time.replace(
-                        '.',
-                        ':'
-                    )
-                }"
+                    if (time.isNullOrBlank()) element.attr("data-date") + "T00:00" else element.attr("data-date") + "T${
+                        time.replace(
+                                '.',
+                                ':'
+                        )
+                    }"
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
             val localDateTime = LocalDateTime.parse(dateStr, formatter)
 
@@ -54,7 +54,7 @@ fun sngScraperEvents(): List<Event>{
             val descUrl = descriptionAndImage["desc"]
             val imageUrl = descriptionAndImage["image"]
 
-            val event = Event(imageUrl!!,title, localDateTime, location, descUrl!!)
+            val event = Event(imageUrl!!, title, localDateTime, location, descUrl!!)
             events.add(event)
             println(event)
         }
@@ -65,8 +65,8 @@ fun sngScraperEvents(): List<Event>{
 fun sngScraperDescriptionAndImage(url: String): MutableMap<String, String> {
     val descriptionAndImage: MutableMap<String, String> = mutableMapOf()
     System.setProperty(
-        "webdriver.chrome.driver",
-        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
+            "webdriver.chrome.driver",
+            "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
     )
     val options = ChromeOptions()
     options.setHeadless(true)

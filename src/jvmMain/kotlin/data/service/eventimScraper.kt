@@ -12,8 +12,8 @@ import java.time.format.DateTimeFormatter
 
 fun eventimScraperEvents(): List<Event> {
     System.setProperty(
-        "webdriver.chrome.driver",
-        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
+            "webdriver.chrome.driver",
+            "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
     )
     val events: MutableList<Event> = mutableListOf()
     val options = ChromeOptions()
@@ -60,18 +60,19 @@ fun eventimScraperEvents(): List<Event> {
             val descUrl = descriptionAndImage["desc"]
             val imageUrl = descriptionAndImage["image"]
 
-            val event = Event(imageUrl!!,title, localDateTime, location, descUrl!!)
+            val event = Event(imageUrl!!, title, localDateTime, location, descUrl!!)
             events.add(event)
             println(event)
         }
     }
     return events
 }
+
 fun eventimScraperDescriptionAndImage(url: String): MutableMap<String, String> {
     val descriptionAndImage: MutableMap<String, String> = mutableMapOf()
     System.setProperty(
-        "webdriver.chrome.driver",
-        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
+            "webdriver.chrome.driver",
+            "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
     )
     val options = ChromeOptions()
     options.setHeadless(true)
@@ -84,13 +85,13 @@ fun eventimScraperDescriptionAndImage(url: String): MutableMap<String, String> {
     val descriptionEventDiv = document.selectFirst(".m-panel")
     val imageEventUrl = document.selectFirst(".img-responsive")
 
-    descriptionAndImage["desc"]  = if(descriptionEventDiv == null) {
+    descriptionAndImage["desc"] = if (descriptionEventDiv == null) {
         "There is not description for this event :("
     } else {
         descriptionEventDiv.text()
     }
 
-    descriptionAndImage["image"] = if(imageEventUrl == null) {
+    descriptionAndImage["image"] = if (imageEventUrl == null) {
         "https:" + document.selectFirst(".o-mainHeader__logoImg")!!.attr("src")
     } else {
         "https:" + imageEventUrl.attr("src")

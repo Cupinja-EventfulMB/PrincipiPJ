@@ -11,7 +11,7 @@ import org.bson.types.ObjectId
 fun main() {
     val dotenv = dotenv {
         directory =
-            "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\.env"
+                "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\.env"
         ignoreIfMissing = true
     }
 
@@ -36,20 +36,20 @@ fun main() {
     for (event in events) {
         queryFilterLocationInstitution = Document("institution", event.location.institution)
         queryFilterEventTitle =
-            Document("title", event.title).append("date", event.date)
+                Document("title", event.title).append("date", event.date)
 
         eventDocument = eventCollection.find(queryFilterEventTitle).first()
         if (eventDocument == null) {
             locationId = locationCollection.find(queryFilterLocationInstitution).firstOrNull()?.get("_id") as ObjectId?// check if location already exists
             if (locationId == null) {
                 locationId = locationCollection.insertOne(
-                    Document().append("institution", event.location.institution).append("city", event.location.city)
-                        .append("street", event.location.street)
+                        Document().append("institution", event.location.institution).append("city", event.location.city)
+                                .append("street", event.location.street)
                 ).insertedId!!.asObjectId().value
             }
             eventCollection.insertOne(
-                Document().append("title", event.title).append("date", event.date)
-                    .append("location", locationId).append("description", event.description).append("img_url", event.image)
+                    Document().append("title", event.title).append("date", event.date)
+                            .append("location", locationId).append("description", event.description).append("img_url", event.image)
             )
         }
     }
