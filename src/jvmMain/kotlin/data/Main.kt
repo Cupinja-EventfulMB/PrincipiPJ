@@ -4,22 +4,11 @@ import Database
 import data.model.Event
 import data.service.eventimScraperEvents
 import data.service.sngScraperEvents
-import io.github.cdimascio.dotenv.dotenv
 import org.bson.Document
 import org.bson.types.ObjectId
 
 fun main() {
-    val dotenv = dotenv {
-        directory =
-                "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\.env"
-        ignoreIfMissing = true
-    }
-
-    val DATABASE_USERNAME: String? = dotenv["DATABASE_USERNAME"]
-    val DATABASE_PASSWORD: String? = dotenv["DATABASE_PASSWORD"]
-    val DATABASE_NAME: String? = dotenv["DATABASE_NAME"]
-
-    val connection = Database.connect(DATABASE_USERNAME!!, DATABASE_PASSWORD!!, DATABASE_NAME!!)
+    val connection = Database.connect()
     // Insert events
     val eventCollection = connection.database.getCollection("events")
     val locationCollection = connection.database.getCollection("locations")
