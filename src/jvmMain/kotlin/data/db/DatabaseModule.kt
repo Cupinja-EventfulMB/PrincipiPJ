@@ -1,3 +1,4 @@
+
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.ServerApi
@@ -5,6 +6,8 @@ import com.mongodb.ServerApiVersion
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoDatabase
+import data.model.Event
+import org.litote.kmongo.getCollection
 
 class Database(val client: MongoClient, val database: MongoDatabase) {
     companion object {
@@ -31,4 +34,6 @@ class Database(val client: MongoClient, val database: MongoDatabase) {
             return Database(mongoClient, database)
         }
     }
+    val eventsCollectionn = database.getCollection<Event>("events")
+
 }
