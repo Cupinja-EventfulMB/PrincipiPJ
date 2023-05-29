@@ -67,7 +67,7 @@ fun EventCardList() {
         }
     }
     val stateVertical = rememberScrollState(0)
-    Box(modifier = Modifier.padding(top = 50.dp)) {
+    Box(modifier = Modifier.padding(top = 10.dp)) {
         LazyColumn(
             modifier = Modifier.padding(
                 horizontal = 10.dp,
