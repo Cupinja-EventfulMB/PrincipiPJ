@@ -1,6 +1,7 @@
 package UI.service
 
 import androidx.compose.runtime.mutableStateListOf
+import data.model.Event
 import data.model.Location
 import org.bson.types.ObjectId
 import org.litote.kmongo.findOneById
@@ -10,15 +11,19 @@ object LocationService {
     private val connection = Database.connect()
     private val locationCollection = connection.database.getCollection("locations")
 
-    fun getLocations() = sequence<Location> {
-        yieldAll(locations)
-        val locationDocs = locationCollection.find().filter { locDoc -> locations.find { it.id != locDoc.getObjectId("_id") } == null }
-        for (locationDoc in locationDocs) {
-            val location = Location.mapDataToObject(locationDoc)
-            locations.add(location)
-            yield(location)
+    fun getLocations(): List<Location> {
+        val events = EventService.getEvents()
+        val locations = mutableListOf<Location>()
+
+        for (event in events) {
+            if (!locations.contains(event.location)) {
+                locations.add(event.location)
+            }
         }
+
+        return locations
     }
+
 
     fun getById(id: ObjectId): Location {
         val location = locations.find { it.id!! == id }

@@ -21,6 +21,7 @@ fun HeaderUI() {
             MenuState.Events -> "Events in Maribor"
             MenuState.Locations -> "Institutions in Maribor and events they have"
             MenuState.Generator -> "Generate events"
+            MenuState.Send -> "Send data"
         }
         Text(
             textAlign = TextAlign.Center,
