@@ -3,11 +3,16 @@ package UI.service
 import Database
 import androidx.compose.runtime.mutableStateListOf
 import data.model.Event
+import data.model.Location
+import data.service.eventimScraperEvents
+import data.service.sngScraperEvents
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.litote.kmongo.deleteOneById
 import org.litote.kmongo.findOneById
 import org.litote.kmongo.updateOneById
+import java.time.LocalDateTime
+import java.util.Date
 
 object EventService {
 
@@ -15,15 +20,19 @@ object EventService {
     private val connection = Database.connect()
     private val eventCollection = connection.database.getCollection("events")
 
-    fun getEvents() = sequence<Event> {
-        yieldAll(events)
-        val eventDocs = eventCollection.find().filter { eventDoc -> events.find { it.id != eventDoc.getObjectId("_id") } == null }
-        for (eventDoc in eventDocs) {
-            val event = Event.mapDataToObject(eventDoc)!!
-            yield(event)
-            events.add(event)
+    fun getEvents(): List<Event> {
+        if (events.isEmpty()) {
+            events.addAll(eventimScraperEvents())
+            events.addAll(sngScraperEvents())
         }
+        return events
     }
+
+    fun getEventsByLocation(location: Location): List<Event> {
+        val filteredEvents = getEvents().filter { event -> event.location == location }
+        return filteredEvents
+    }
+
 
     fun getById(id: ObjectId): Event {
         val event = events.find { it.id!! == id }
@@ -33,11 +42,13 @@ object EventService {
         return newEvent
     }
 
-    fun updateTitle(id: ObjectId, newTitle: String) {
-        val updateBson = Document("\$set", Document("title", newTitle))
-        val index = events.indexOfFirst { it.id == id }
+    fun updateTitle(event: Event, newTitle: String) {
+        val index = events.indexOfFirst { it == event }
         events[index].title = newTitle
-        eventCollection.updateOneById(id, updateBson)
+    }
+    fun updateDate(event: Event, newDate: LocalDateTime) {
+        val index = events.indexOfFirst { it == event }
+        events[index].date = newDate
     }
 
     fun getByLocationId(locId: ObjectId) = sequence<Event> {
@@ -51,10 +62,13 @@ object EventService {
         }
     }
 
-    fun delete(id: ObjectId): Boolean {
-        val res = eventCollection.deleteOneById(id)
-        events.removeIf { it.id == id }
-        return res.deletedCount > 0
+    fun deleteEvent(event: Event) {
+        events.removeIf { it == event }
+    }
+
+    fun saveEventDate(event: Event, date: LocalDateTime) {
+        val index = events.indexOfFirst { it == event }
+        events[index].date = date
     }
 
 }

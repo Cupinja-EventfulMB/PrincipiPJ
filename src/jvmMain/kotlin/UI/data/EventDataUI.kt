@@ -63,7 +63,6 @@ fun EventCardList() {
     scope.launch {
         for (event in EventService.getEvents()) {
             events.add(event)
-            delay(100)
         }
     }
     val stateVertical = rememberScrollState(0)
