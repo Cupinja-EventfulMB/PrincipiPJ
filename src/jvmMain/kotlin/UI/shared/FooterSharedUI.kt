@@ -1,6 +1,8 @@
 package UI.shared
 
+import UI.HttpClient
 import UI.MenuState
+import UI.service.EventService
 import UI.service.NavService
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.BottomAppBar
@@ -38,10 +40,10 @@ fun FooterButton(
 @Composable
 fun FooterUI() {
     BottomAppBar(backgroundColor = Color.Cyan) {
-        Row{
+        Row {
             FooterButton(
                 text = "Events",
-                onClick =  { NavService.currentNav = MenuState.Events },
+                onClick = { NavService.currentNav = MenuState.Events },
                 modifier = Modifier.weight(1f),
                 style = TextStyle(
                     fontSize = 20.sp,
@@ -50,7 +52,7 @@ fun FooterUI() {
             )
             FooterButton(
                 text = "Locations",
-                onClick =  {NavService.currentNav = MenuState.Locations },
+                onClick = { NavService.currentNav = MenuState.Locations },
                 modifier = Modifier.weight(1f),
                 style = TextStyle(
                     fontSize = 20.sp,
@@ -59,7 +61,20 @@ fun FooterUI() {
             )
             FooterButton(
                 text = "Generate data",
-                onClick =  {NavService.currentNav = MenuState.Generator },
+                onClick = { NavService.currentNav = MenuState.Generator },
+                modifier = Modifier.weight(1f),
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    color = Color.Black,
+                )
+            )
+            FooterButton(
+                text = "Save Scraped Events",
+                onClick = {
+                    for (event in EventService.getEvents()) {
+                        HttpClient.insertEventIntoMongo(event)
+                    }
+                },
                 modifier = Modifier.weight(1f),
                 style = TextStyle(
                     fontSize = 20.sp,
