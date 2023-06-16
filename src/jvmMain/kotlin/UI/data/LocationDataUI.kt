@@ -1,6 +1,6 @@
-
 import UI.DetailedViewMode
 import UI.service.EventService
+import UI.service.EventService.deleteEvent
 import UI.service.LocationService
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -22,32 +22,144 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import data.model.Event
 import data.model.Location
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun TextInputField(value: String = "", label: String = "Label", onChange: (newValue: String) -> Unit, modifier: Modifier = Modifier) {
+fun TextInputField(
+    value: String = "",
+    label: String = "Label",
+    onChange: (newValue: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     TextField(value = value, label = { Text(label) }, modifier = modifier, onValueChange = onChange)
 }
 
 @Composable
-fun LocationEventList(location: Location) {
-    val events = mutableStateListOf<Event>()
-    val scope = rememberCoroutineScope()
-    scope.launch {
-        for (event in EventService.getByLocationId(location.id!!)) {
-            events.add(event)
-            delay(100)
+fun IntInputField(
+    value: Int = 0,
+    label: String = "Label",
+    onChange: (newValue: Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TextField(value = value.toString(), label = { Text(label) }, modifier = modifier, onValueChange = {
+        val intValue = it.toIntOrNull()
+        if (intValue != null) {
+            onChange(intValue)
+        }
+    })
+}
+
+@Composable
+fun DateTimeInputField(
+    value: LocalDateTime = LocalDateTime.now(),
+    label: String = "Label",
+    onChange: (newValue: LocalDateTime) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var day by remember { mutableStateOf(value.dayOfMonth) }
+    var month by remember { mutableStateOf(value.monthValue) }
+    var year by remember { mutableStateOf(value.year) }
+    var hour by remember { mutableStateOf(value.hour) }
+    var minute by remember { mutableStateOf(value.minute) }
+
+    fun onDateTimeChanged() {
+        val stringDate = "${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/$year ${
+            hour.toString().padStart(2, '0')
+        }:${minute.toString().padStart(2, '0')}"
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm") // dd/MM/yyyy HH:mm
+        try {
+            val date = LocalDateTime.parse(stringDate, formatter)
+            onChange(date)
+        } catch (ex: Exception) {
+            println(ex)
         }
     }
+
+    Row {
+        IntInputField(day, label = "Day", onChange = {
+            day = it
+            onDateTimeChanged()
+        })
+        Text(".")
+        IntInputField(month, label = "Month", onChange = {
+            month = it
+            onDateTimeChanged()
+        })
+        Text(".")
+        IntInputField(year, label = "Year", onChange = {
+            year = it
+            onDateTimeChanged()
+        })
+        Text(" ")
+        IntInputField(hour, label = "Hours", onChange = {
+            hour = it
+            onDateTimeChanged()
+        })
+        Text(":")
+        IntInputField(minute, label = "Minute", onChange = {
+            minute = it
+            onDateTimeChanged()
+        })
+    }
+}
+
+@Composable
+fun DateInputField(
+    value: LocalDateTime = LocalDateTime.now(),
+    onChange: (newValue: LocalDateTime) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String
+) {
+    var day by remember { mutableStateOf(value.dayOfMonth) }
+    var month by remember { mutableStateOf(value.monthValue) }
+    var year by remember { mutableStateOf(value.year) }
+    val hour by remember { mutableStateOf(value.hour) }
+    val minute by remember { mutableStateOf(value.minute) }
+    fun onDateTimeChanged() {
+        val stringDate = "${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/$year ${
+            hour.toString().padStart(2, '0')
+        }:${minute.toString().padStart(2, '0')}"
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm") // dd/MM/yyyy HH:mm
+        try {
+            val date = LocalDateTime.parse(stringDate, formatter)
+            onChange(date)
+        } catch (ex: Exception) {
+            println(ex)
+        }
+    }
+
+    Row(modifier = modifier) {
+        IntInputField(day, label = "Day", onChange = {
+            day = it
+            onDateTimeChanged()
+        })
+        Text("/")
+        IntInputField(month, label = "Month", onChange = {
+            month = it
+            onDateTimeChanged()
+        })
+        Text("/")
+        IntInputField(year, label = "Year", onChange = {
+            year = it
+            onDateTimeChanged()
+        })
+    }
+}
+
+// todo da se popraj x
+@Composable
+fun LocationEventList(location: Location) {
+    val events = EventService.getEventsByLocation(location)
+    val scope = rememberCoroutineScope()
+
     LazyColumn(modifier = Modifier.height(200.dp).padding(horizontal = 20.dp)) {
         items(events) { currEvent ->
             var mode by remember { mutableStateOf<DetailedViewMode>(DetailedViewMode.VIEW) }
             var title by remember { mutableStateOf(currEvent.title) }
+            var date by remember { mutableStateOf<LocalDateTime>(currEvent.date) }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -56,15 +168,15 @@ fun LocationEventList(location: Location) {
                     Text("Title: $title", modifier = Modifier.weight(1.5f))
 
                     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-                    val formattedDateTime = currEvent.date.format(formatter)
+                    val formattedDateTime = date.format(formatter)
 
-                    Text("Date: ${formattedDateTime}", modifier = Modifier.weight(0.5f))
+                    Text("Date: $formattedDateTime", modifier = Modifier.weight(0.5f))
                     Row {
                         IconButton(onClick = { mode = DetailedViewMode.EDIT }) {
                             Icon(Icons.Default.Edit, contentDescription = "Edit event")
                         }
                         IconButton(onClick = {
-                            currEvent.delete()
+                            deleteEvent(currEvent)
                         }) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete event")
                         }
@@ -78,14 +190,27 @@ fun LocationEventList(location: Location) {
                             title = it
                         }
                     )
+                    DateInputField(
+                        value = date,
+                        label = "Date",
+                        modifier = Modifier.weight(1.5f),
+                        onChange = {
+                            date = it
+                        }
+                    )
                     Row {
                         IconButton(onClick = {
-                            EventService.updateTitle(currEvent.id!!, title)
+                            EventService.updateTitle(currEvent, title)
                             mode = DetailedViewMode.VIEW
                         }) {
                             Icon(Icons.Default.Check, contentDescription = "Confirm change")
+                            EventService.saveEventDate(currEvent, date)
                         }
-                        IconButton(onClick = { mode = DetailedViewMode.VIEW }) {
+                        IconButton(onClick = {
+                            date = currEvent.date // todo nedela
+                            title = currEvent.title
+                            mode = DetailedViewMode.VIEW
+                        }) {
                             Icon(Icons.Default.Clear, contentDescription = "Cancel change")
                         }
                     }
@@ -121,9 +246,11 @@ fun LocationDetailCard(location: Location) {
                         contentDescription = location.institution,
                         modifier = Modifier.scale(1.5f).padding(end = 20.dp),
                     )
-                    Text(text = location.institution,
+                    Text(
+                        text = location.institution,
                         fontWeight = FontWeight.Bold,
-                    )                }
+                    )
+                }
                 Text("${location.street} ${location.city}")
             }
         }
@@ -139,7 +266,6 @@ fun LocationDetailCardList() {
     scope.launch {
         for (location in LocationService.getLocations()) {
             locations.add(location)
-            delay(100)
         }
     }
     val state = rememberLazyListState()

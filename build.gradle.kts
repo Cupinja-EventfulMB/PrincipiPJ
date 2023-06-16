@@ -31,7 +31,8 @@ kotlin {
                 implementation ("org.mongodb:mongodb-driver-sync:4.5.1") // mongodb
                 implementation("org.litote.kmongo:kmongo:4.3.0") // mongodb kotlin dependencxy
                 implementation ("io.github.cdimascio:dotenv-kotlin:6.4.1") // .env
-
+                implementation ("com.squareup.okhttp3:okhttp:4.9.1") // OkHttp
+                implementation ("com.google.code.gson:gson:2.8.8") // toJSON
             }
         }
         val jvmTest by getting

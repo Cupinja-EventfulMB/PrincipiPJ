@@ -11,10 +11,12 @@ data class Location(
     val institution: String,
     val city: String,
     val street: String,
-    val id: ObjectId? = null,
+    var x: Double = 0.0,
+    var y: Double = 0.0,
+    val id: ObjectId? = null
 ) {
     override fun toString(): String {
-        return "$institution, $city, $street "
+        return "$institution, $city, $street, $x, $y "
     }
 
     companion object {
@@ -23,6 +25,8 @@ data class Location(
                 data.getString("institution"),
                 data.getString("city"),
                 data.getString("street"),
+                data.getDouble("x"),
+                data.getDouble("y"),
                 data.getObjectId("_id")
             )
         }

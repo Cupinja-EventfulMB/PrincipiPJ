@@ -1,5 +1,6 @@
 package data.service
 
+import UI.HttpClient
 import data.model.Event
 import data.model.Location
 import org.jsoup.Jsoup
@@ -12,8 +13,8 @@ import java.time.format.DateTimeFormatter
 
 fun eventimScraperEvents(): List<Event> {
     System.setProperty(
-            "webdriver.chrome.driver",
-            "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
+        "webdriver.chrome.driver",
+        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
     )
     val events: MutableList<Event> = mutableListOf()
     val options = ChromeOptions()
@@ -52,6 +53,9 @@ fun eventimScraperEvents(): List<Event> {
             val city = element.selectFirst(".m-eventListItem__address")!!.text()
             val street = hashMapInstitutionLocation[institution]!!
             val location = Location(institution, city, street)
+//            val lantLong = HttpClient.getLocationLatAndLong(location)
+//            location.x = lantLong[0]
+//            location.y = lantLong[1]
 
             val descImgPlace = element.selectFirst(".m-eventListItem")
             val descImgUrl = "https://www.eventim.si" + descImgPlace!!.attr("href")
@@ -60,9 +64,9 @@ fun eventimScraperEvents(): List<Event> {
             val descUrl = descriptionAndImage["desc"]
             val imageUrl = descriptionAndImage["image"]
 
-            val event = Event(imageUrl!!, title, localDateTime, location, descUrl!!)
+            val event = Event(title, localDateTime, location, descUrl!!, imageUrl!!)
             events.add(event)
-            println(event)
+            println(event.toJson())
         }
     }
     return events
@@ -71,8 +75,8 @@ fun eventimScraperEvents(): List<Event> {
 fun eventimScraperDescriptionAndImage(url: String): MutableMap<String, String> {
     val descriptionAndImage: MutableMap<String, String> = mutableMapOf()
     System.setProperty(
-            "webdriver.chrome.driver",
-            "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
+        "webdriver.chrome.driver",
+        "C:\\Users\\User\\Desktop\\Materijali_2_letnik\\PrincipiPJ\\vaje\\projektna_vaja_1\\PrincipiPJ\\src\\jvmMain\\kotlin\\chromedriver.exe"
     )
     val options = ChromeOptions()
     options.setHeadless(true)
